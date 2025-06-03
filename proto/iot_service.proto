@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package iotdevice;
+
+service DeviceManagementService {
+    rpc RegisterDevice(DeviceRegistrationRequest) returns (DeviceRegistrationResponse);
+    rpc GetDeviceStatus(DeviceStatusRequest) returns (DeviceStatusResponse);
+    rpc SendCommandToDevice(DeviceCommandRequest) returns (CommandAcknowledgement);
+}
+
+message DeviceRegistrationRequest {
+    string device_id = 1;
+    string device_type = 2;
+}
+
+message DeviceRegistrationResponse {
+    bool success = 1;
+    string message = 2;
+    string server_assigned_token = 3;
+}
+
+message DeviceStatusRequest {
+    string device_id = 1;
+}
+
+message DeviceStatusResponse {
+    string device_id = 1;
+    string status = 2;
+    int64 uptime_seconds = 3;
+}
+
+message DeviceCommandRequest {
+    string device_id = 1;
+    string command_name = 2;
+    string payload_json = 3;
+}
+
+message CommandAcknowledgement {
+    bool received = 1;
+    string message = 2;
+}
