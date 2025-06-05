@@ -1,0 +1,36 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "Node.js TypeScript clients for gRPC IoT service",
+  "main": "dist/device_simulator.js",
+  "scripts": {
+    "build": "tsc",
+    "start:device": "npm run build && node dist/device_simulator.js",
+    "start:mgmt": "npm run build && node dist/management_console.js",
+    "dev:device": "ts-node src/device_simulator.ts",
+    "dev:mgmt": "ts-node src/management_console.ts",
+    "proto:gen": "grpc_tools_node_protoc --proto_path=./proto --plugin=protoc-gen-ts=./node_modules/grpc_tools_node_protoc_ts/bin/protoc-gen-ts --js_out=import_style=commonjs,binary:./src/proto_gen --grpc_out=grpc_js:./src/proto_gen --ts_out=service=grpc-js:./src/proto_gen iot_service.proto",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "grpc",
+    "iot",
+    "client",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.13.4",
+    "@grpc/proto-loader": "^0.7.15",
+    "google-protobuf": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "grpc_tools_node_protoc_ts": "^5.3.3",
+    "grpc-tools": "^1.13.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
