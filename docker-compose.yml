@@ -1,0 +1,55 @@
+services:
+  py-server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: python_grpc_server
+    ports:
+      - "50051:50051"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+    networks:
+      - iot_network
+    restart: always
+
+  node-device-simulator-ts:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: node_device_simulator_ts
+    environment:
+      - SERVER_ADDRESS=py-server:50051
+      - DEVICE_ID=fixed-ts-device-001
+      - NODE_ENV=development
+    command: ["node", "dist/device_simulator.js"]
+    depends_on:
+      - py-server
+    volumes:
+       - ./client/src:/usr/src/app/src
+       - ./proto:/usr/src/app/proto
+    networks:
+      - iot_network
+
+  node-management-console-ts:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: node_management_console_ts
+    environment:
+      - SERVER_ADDRESS=py-server:50051
+      - TARGET_DEVICE_ID=fixed-ts-device-001
+      - NODE_ENV=development
+    command: ["node", "dist/management_console.js", "fixed-ts-device-001", "status"]
+    depends_on:
+      - py-server
+      - node-device-simulator-ts
+    volumes:
+       - ./client/src:/usr/src/app/src
+       - ./proto:/usr/src/app/proto
+    networks:
+      - iot_network
+
+networks:
+  iot_network:
+    driver: bridge
