@@ -13,6 +13,7 @@ interface IDeviceManagementServiceService extends grpc.ServiceDefinition<grpc.Un
     sendCommandToDevice: IDeviceManagementServiceService_ISendCommandToDevice;
     subscribeToDeviceTelemetry: IDeviceManagementServiceService_ISubscribeToDeviceTelemetry;
     uploadBulkTelemetry: IDeviceManagementServiceService_IUploadBulkTelemetry;
+    establishInteractiveSession: IDeviceManagementServiceService_IEstablishInteractiveSession;
 }
 
 interface IDeviceManagementServiceService_IRegisterDevice extends grpc.MethodDefinition<iot_service_pb.DeviceRegistrationRequest, iot_service_pb.DeviceRegistrationResponse> {
@@ -60,6 +61,15 @@ interface IDeviceManagementServiceService_IUploadBulkTelemetry extends grpc.Meth
     responseSerialize: grpc.serialize<iot_service_pb.BulkUploadSummary>;
     responseDeserialize: grpc.deserialize<iot_service_pb.BulkUploadSummary>;
 }
+interface IDeviceManagementServiceService_IEstablishInteractiveSession extends grpc.MethodDefinition<iot_service_pb.DeviceToServerMessage, iot_service_pb.ServerToDeviceMessage> {
+    path: "/iotdevice.DeviceManagementService/EstablishInteractiveSession";
+    requestStream: true;
+    responseStream: true;
+    requestSerialize: grpc.serialize<iot_service_pb.DeviceToServerMessage>;
+    requestDeserialize: grpc.deserialize<iot_service_pb.DeviceToServerMessage>;
+    responseSerialize: grpc.serialize<iot_service_pb.ServerToDeviceMessage>;
+    responseDeserialize: grpc.deserialize<iot_service_pb.ServerToDeviceMessage>;
+}
 
 export const DeviceManagementServiceService: IDeviceManagementServiceService;
 
@@ -69,6 +79,7 @@ export interface IDeviceManagementServiceServer {
     sendCommandToDevice: grpc.handleUnaryCall<iot_service_pb.DeviceCommandRequest, iot_service_pb.CommandAcknowledgement>;
     subscribeToDeviceTelemetry: grpc.handleServerStreamingCall<iot_service_pb.TelemetrySubscriptionRequest, iot_service_pb.TelemetryDataPoint>;
     uploadBulkTelemetry: grpc.handleClientStreamingCall<iot_service_pb.TelemetryDataPoint, iot_service_pb.BulkUploadSummary>;
+    establishInteractiveSession: grpc.handleBidiStreamingCall<iot_service_pb.DeviceToServerMessage, iot_service_pb.ServerToDeviceMessage>;
 }
 
 export interface IDeviceManagementServiceClient {
@@ -87,6 +98,9 @@ export interface IDeviceManagementServiceClient {
     uploadBulkTelemetry(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
     uploadBulkTelemetry(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
     uploadBulkTelemetry(metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
+    establishInteractiveSession(): grpc.ClientDuplexStream<iot_service_pb.DeviceToServerMessage, iot_service_pb.ServerToDeviceMessage>;
+    establishInteractiveSession(options: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<iot_service_pb.DeviceToServerMessage, iot_service_pb.ServerToDeviceMessage>;
+    establishInteractiveSession(metadata: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<iot_service_pb.DeviceToServerMessage, iot_service_pb.ServerToDeviceMessage>;
 }
 
 export class DeviceManagementServiceClient extends grpc.Client implements IDeviceManagementServiceClient {
@@ -106,4 +120,6 @@ export class DeviceManagementServiceClient extends grpc.Client implements IDevic
     public uploadBulkTelemetry(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
     public uploadBulkTelemetry(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
     public uploadBulkTelemetry(metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
+    public establishInteractiveSession(options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<iot_service_pb.DeviceToServerMessage, iot_service_pb.ServerToDeviceMessage>;
+    public establishInteractiveSession(metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientDuplexStream<iot_service_pb.DeviceToServerMessage, iot_service_pb.ServerToDeviceMessage>;
 }

@@ -229,3 +229,96 @@ export namespace BulkUploadSummary {
         message: string,
     }
 }
+
+export class DeviceToServerMessage extends jspb.Message { 
+    getDeviceId(): string;
+    setDeviceId(value: string): DeviceToServerMessage;
+
+    hasLiveTelemetry(): boolean;
+    clearLiveTelemetry(): void;
+    getLiveTelemetry(): TelemetryDataPoint | undefined;
+    setLiveTelemetry(value?: TelemetryDataPoint): DeviceToServerMessage;
+
+    hasStatusUpdate(): boolean;
+    clearStatusUpdate(): void;
+    getStatusUpdate(): string;
+    setStatusUpdate(value: string): DeviceToServerMessage;
+
+    hasCommandResponsePayload(): boolean;
+    clearCommandResponsePayload(): void;
+    getCommandResponsePayload(): string;
+    setCommandResponsePayload(value: string): DeviceToServerMessage;
+
+    getEventCase(): DeviceToServerMessage.EventCase;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): DeviceToServerMessage.AsObject;
+    static toObject(includeInstance: boolean, msg: DeviceToServerMessage): DeviceToServerMessage.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: DeviceToServerMessage, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): DeviceToServerMessage;
+    static deserializeBinaryFromReader(message: DeviceToServerMessage, reader: jspb.BinaryReader): DeviceToServerMessage;
+}
+
+export namespace DeviceToServerMessage {
+    export type AsObject = {
+        deviceId: string,
+        liveTelemetry?: TelemetryDataPoint.AsObject,
+        statusUpdate: string,
+        commandResponsePayload: string,
+    }
+
+    export enum EventCase {
+        EVENT_NOT_SET = 0,
+        LIVE_TELEMETRY = 2,
+        STATUS_UPDATE = 3,
+        COMMAND_RESPONSE_PAYLOAD = 4,
+    }
+
+}
+
+export class ServerToDeviceMessage extends jspb.Message { 
+
+    hasCommandRequest(): boolean;
+    clearCommandRequest(): void;
+    getCommandRequest(): DeviceCommandRequest | undefined;
+    setCommandRequest(value?: DeviceCommandRequest): ServerToDeviceMessage;
+
+    hasConfigUpdateJson(): boolean;
+    clearConfigUpdateJson(): void;
+    getConfigUpdateJson(): string;
+    setConfigUpdateJson(value: string): ServerToDeviceMessage;
+
+    hasAcknowledgementMessage(): boolean;
+    clearAcknowledgementMessage(): void;
+    getAcknowledgementMessage(): string;
+    setAcknowledgementMessage(value: string): ServerToDeviceMessage;
+
+    getActionCase(): ServerToDeviceMessage.ActionCase;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): ServerToDeviceMessage.AsObject;
+    static toObject(includeInstance: boolean, msg: ServerToDeviceMessage): ServerToDeviceMessage.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: ServerToDeviceMessage, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): ServerToDeviceMessage;
+    static deserializeBinaryFromReader(message: ServerToDeviceMessage, reader: jspb.BinaryReader): ServerToDeviceMessage;
+}
+
+export namespace ServerToDeviceMessage {
+    export type AsObject = {
+        commandRequest?: DeviceCommandRequest.AsObject,
+        configUpdateJson: string,
+        acknowledgementMessage: string,
+    }
+
+    export enum ActionCase {
+        ACTION_NOT_SET = 0,
+        COMMAND_REQUEST = 1,
+        CONFIG_UPDATE_JSON = 2,
+        ACKNOWLEDGEMENT_MESSAGE = 3,
+    }
+
+}

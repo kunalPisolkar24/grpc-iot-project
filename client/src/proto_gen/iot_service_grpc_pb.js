@@ -81,6 +81,28 @@ function deserialize_iotdevice_DeviceStatusResponse(buffer_arg) {
   return iot_service_pb.DeviceStatusResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_iotdevice_DeviceToServerMessage(arg) {
+  if (!(arg instanceof iot_service_pb.DeviceToServerMessage)) {
+    throw new Error('Expected argument of type iotdevice.DeviceToServerMessage');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_iotdevice_DeviceToServerMessage(buffer_arg) {
+  return iot_service_pb.DeviceToServerMessage.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_iotdevice_ServerToDeviceMessage(arg) {
+  if (!(arg instanceof iot_service_pb.ServerToDeviceMessage)) {
+    throw new Error('Expected argument of type iotdevice.ServerToDeviceMessage');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_iotdevice_ServerToDeviceMessage(buffer_arg) {
+  return iot_service_pb.ServerToDeviceMessage.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_iotdevice_TelemetryDataPoint(arg) {
   if (!(arg instanceof iot_service_pb.TelemetryDataPoint)) {
     throw new Error('Expected argument of type iotdevice.TelemetryDataPoint');
@@ -159,6 +181,17 @@ var DeviceManagementServiceService = exports.DeviceManagementServiceService = {
     requestDeserialize: deserialize_iotdevice_TelemetryDataPoint,
     responseSerialize: serialize_iotdevice_BulkUploadSummary,
     responseDeserialize: deserialize_iotdevice_BulkUploadSummary,
+  },
+  establishInteractiveSession: {
+    path: '/iotdevice.DeviceManagementService/EstablishInteractiveSession',
+    requestStream: true,
+    responseStream: true,
+    requestType: iot_service_pb.DeviceToServerMessage,
+    responseType: iot_service_pb.ServerToDeviceMessage,
+    requestSerialize: serialize_iotdevice_DeviceToServerMessage,
+    requestDeserialize: deserialize_iotdevice_DeviceToServerMessage,
+    responseSerialize: serialize_iotdevice_ServerToDeviceMessage,
+    responseDeserialize: deserialize_iotdevice_ServerToDeviceMessage,
   },
 };
 
