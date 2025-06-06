@@ -2,6 +2,7 @@ import grpc
 from concurrent import futures
 import time
 import random
+
 import iot_service_pb2 # type: ignore
 import iot_service_pb2_grpc # type: ignore
 
@@ -142,6 +143,30 @@ class DeviceManagementServiceImpl(iot_service_pb2_grpc.DeviceManagementServiceSe
             context.abort(grpc.StatusCode.INTERNAL, "Unexpected error during telemetry streaming.")
         finally:
             print(f"PY_SERVER: Telemetry stream for {device_id} concluded.")
+
+    def UploadBulkTelemetry(self, request_iterator, context):
+        print("PY_SERVER: Received call for UploadBulkTelemetry.")
+        points_received_count = 0
+        points_failed_count = 0
+        processed_device_ids = set()
+
+        for data_point in request_iterator:
+            if not data_point.device_id or not data_point.sensor_id:
+                print(f"PY_SERVER: Invalid data point received (missing device_id or sensor_id), skipping.")
+                points_failed_count += 1
+                continue
+
+            print(f"PY_SERVER: Processing bulk telemetry for {data_point.device_id} - Sensor: {data_point.sensor_id}, Value: {data_point.value}")
+            points_received_count += 1
+            processed_device_ids.add(data_point.device_id)
+
+        summary_message = f"Processed bulk telemetry for devices: {', '.join(list(processed_device_ids)) if processed_device_ids else 'None'}."
+        print(f"PY_SERVER: Bulk upload finished. {summary_message} Received: {points_received_count}, Failed: {points_failed_count}")
+        return iot_service_pb2.BulkUploadSummary(
+            points_received=points_received_count,
+            points_failed=points_failed_count,
+            message=summary_message
+        )
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
