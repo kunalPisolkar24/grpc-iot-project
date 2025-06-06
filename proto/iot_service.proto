@@ -7,6 +7,7 @@ service DeviceManagementService {
     rpc GetDeviceStatus(DeviceStatusRequest) returns (DeviceStatusResponse);
     rpc SendCommandToDevice(DeviceCommandRequest) returns (CommandAcknowledgement);
     rpc SubscribeToDeviceTelemetry(TelemetrySubscriptionRequest) returns (stream TelemetryDataPoint);
+    rpc UploadBulkTelemetry(stream TelemetryDataPoint) returns (BulkUploadSummary);
 }
 
 message DeviceRegistrationRequest {
@@ -51,4 +52,10 @@ message TelemetryDataPoint {
     string sensor_id = 3;
     double value = 4;
     map<string, string> metadata = 5;
+}
+
+message BulkUploadSummary {
+    int32 points_received = 1;
+    int32 points_failed = 2;
+    string message = 3;
 }
