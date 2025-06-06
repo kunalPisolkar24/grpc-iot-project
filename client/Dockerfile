@@ -21,3 +21,4 @@ RUN npm install --omit=dev
 
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/src/proto_gen ./dist/proto_gen
+COPY certs/server.crt ./certs/server.crt
