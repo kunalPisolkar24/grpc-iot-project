@@ -19,6 +19,7 @@ COPY --from=builder /app_build/iot_service_pb2.py .
 COPY --from=builder /app_build/iot_service_pb2_grpc.py .
 
 COPY server/server.py .
+COPY certs ./certs/
 
 EXPOSE 50051
 

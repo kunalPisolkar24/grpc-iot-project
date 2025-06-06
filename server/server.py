@@ -1,9 +1,11 @@
 import grpc
 from concurrent import futures
 import time
+import iot_service_pb2 #type: ignore
+import iot_service_pb2_grpc #type: ignore
 
-import iot_service_pb2 # type: ignore
-import iot_service_pb2_grpc # type: ignore
+SERVER_CERTIFICATE_PATH = '/app/certs/server.crt'
+SERVER_PRIVATE_KEY_PATH = '/app/certs/server.key'
 
 registered_devices = {}
 
@@ -90,8 +92,23 @@ def serve():
     iot_service_pb2_grpc.add_DeviceManagementServiceServicer_to_server(
         DeviceManagementServiceImpl(), server
     )
-    server.add_insecure_port('[::]:50051')
-    print("PY_SERVER: Python gRPC server started on port 50051...")
+
+    try:
+        with open(SERVER_PRIVATE_KEY_PATH, 'rb') as f:
+            private_key = f.read()
+        with open(SERVER_CERTIFICATE_PATH, 'rb') as f:
+            certificate_chain = f.read()
+    except FileNotFoundError as e:
+        print(f"Fatal Error: SSL certificate files not found. {e}")
+        print(f"Ensure '{SERVER_PRIVATE_KEY_PATH}' and '{SERVER_CERTIFICATE_PATH}' are correctly copied into the container.")
+        return
+
+    server_credentials = grpc.ssl_server_credentials(
+        ((private_key, certificate_chain),)
+    )
+
+    server.add_secure_port('[::]:50051', server_credentials)
+    print("PY_SERVER: Python gRPC server started securely on port 50051...")
     server.start()
     server.wait_for_termination()
 
