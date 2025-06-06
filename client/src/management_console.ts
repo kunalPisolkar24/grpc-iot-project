@@ -6,7 +6,9 @@ import {
     DeviceStatusRequest,
     DeviceStatusResponse,
     DeviceCommandRequest,
-    CommandAcknowledgement
+    CommandAcknowledgement,
+    TelemetrySubscriptionRequest,
+    TelemetryDataPoint
 } from './proto_gen/iot_service_pb';
 
 const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'py-server:50051';
@@ -62,9 +64,45 @@ function getDeadline(seconds: number = 5): Date {
     return new Date(Date.now() + seconds * 1000);
 }
 
+function subscribeToTelemetry(deviceId: string): void {
+    console.log(`NODE_CLIENT_TS (MgmtConsole): Subscribing to telemetry for device: ${deviceId}`);
+    const request = new TelemetrySubscriptionRequest();
+    request.setDeviceId(deviceId);
+
+    const call = client.subscribeToDeviceTelemetry(request);
+
+    call.on('data', (dataPoint: TelemetryDataPoint) => {
+        console.log(`NODE_CLIENT_TS (MgmtConsole): Received Telemetry for ${dataPoint.getDeviceId()}:`);
+        console.log(`  Sensor: ${dataPoint.getSensorId()}, Value: ${dataPoint.getValue()}, Timestamp: ${new Date(dataPoint.getTimestampMs()).toISOString()}`);
+        const metadata = dataPoint.getMetadataMap();
+        if (metadata.getLength() > 0) {
+            console.log("  Metadata:");
+            metadata.forEach((value: any, key: any) => {
+                console.log(`    ${key}: ${value}`);
+            });
+        }
+    });
+
+    call.on('error', (error: grpc.ServiceError) => {
+        if (error.code === grpc.status.CANCELLED) {
+            console.log(`NODE_CLIENT_TS (MgmtConsole): Telemetry stream for ${deviceId} cancelled by client or server.`);
+        } else {
+            console.error(`NODE_CLIENT_TS (MgmtConsole): Telemetry Stream Error for ${deviceId}: ${error.message} (Code: ${error.code})`);
+        }
+    });
+
+    call.on('end', () => {
+        console.log(`NODE_CLIENT_TS (MgmtConsole): Telemetry stream for ${deviceId} ended by server.`);
+    });
+
+    call.on('status', (status: grpc.StatusObject) => {
+        console.log(`NODE_CLIENT_TS (MgmtConsole): Telemetry Stream Status for ${deviceId}: ${status.details} (Code: ${status.code})`);
+    });
+}
+
 function mainManagementConsole(): void {
     const targetDeviceId = process.argv[2] || (process.env.TARGET_DEVICE_ID || "fixed-ts-device-001");
-    const action = process.argv[3] || "status";
+    const action = process.argv[3] || "telemetry";
     const commandName = process.argv[4] || "SECURE_REBOOT";
     const commandPayload = { reason: "Secure scheduled maintenance", initiated_by: "mgmt_console_ts_secure" };
 
@@ -74,8 +112,10 @@ function mainManagementConsole(): void {
         getDeviceStatus(targetDeviceId);
     } else if (action === "command") {
         sendCommand(targetDeviceId, commandName, commandPayload);
+    } else if (action === "telemetry") {
+        subscribeToTelemetry(targetDeviceId);
     } else {
-        console.log(`NODE_CLIENT_TS (MgmtConsole): Unknown action '${action}'. Use 'status' or 'command <commandName>'.`);
+        console.log(`NODE_CLIENT_TS (MgmtConsole): Unknown action '${action}'. Use 'status', 'command <commandName>', or 'telemetry'.`);
     }
 }
 
