@@ -105,36 +105,27 @@ class DeviceManagementServiceImpl(iot_service_pb2_grpc.DeviceManagementServiceSe
                 if not context.is_active():
                     print(f"PY_SERVER: Client for {device_id} telemetry disconnected.")
                     break
-
                 temperature = 20 + random.uniform(-2, 2) + i * 0.5
                 humidity = 50 + random.uniform(-5, 5) - i * 0.3
-
                 temp_point = iot_service_pb2.TelemetryDataPoint(
-                    device_id=device_id,
-                    timestamp_ms=int(time.time() * 1000),
-                    sensor_id="temperature_sensor_01",
-                    value=round(temperature, 2),
+                    device_id=device_id, timestamp_ms=int(time.time() * 1000),
+                    sensor_id="temperature_sensor_01", value=round(temperature, 2),
                     metadata={"unit": "celsius", "location": "server_room"}
                 )
                 print(f"PY_SERVER: Streaming temp: {temp_point.value} for {device_id}")
                 yield temp_point
                 time.sleep(0.5)
-
                 if not context.is_active():
                     print(f"PY_SERVER: Client for {device_id} telemetry disconnected.")
                     break
-
                 humidity_point = iot_service_pb2.TelemetryDataPoint(
-                    device_id=device_id,
-                    timestamp_ms=int(time.time() * 1000),
-                    sensor_id="humidity_sensor_01",
-                    value=round(humidity, 2),
+                    device_id=device_id, timestamp_ms=int(time.time() * 1000),
+                    sensor_id="humidity_sensor_01", value=round(humidity, 2),
                     metadata={"unit": "%", "location": "server_room"}
                 )
                 print(f"PY_SERVER: Streaming humidity: {humidity_point.value} for {device_id}")
                 yield humidity_point
                 time.sleep(1.5)
-
             print(f"PY_SERVER: Finished streaming telemetry for {device_id}")
         except grpc.RpcError as e:
             print(f"PY_SERVER: RPC error during telemetry streaming for {device_id}: {e}")
@@ -149,17 +140,14 @@ class DeviceManagementServiceImpl(iot_service_pb2_grpc.DeviceManagementServiceSe
         points_received_count = 0
         points_failed_count = 0
         processed_device_ids = set()
-
         for data_point in request_iterator:
             if not data_point.device_id or not data_point.sensor_id:
                 print(f"PY_SERVER: Invalid data point received (missing device_id or sensor_id), skipping.")
                 points_failed_count += 1
                 continue
-
             print(f"PY_SERVER: Processing bulk telemetry for {data_point.device_id} - Sensor: {data_point.sensor_id}, Value: {data_point.value}")
             points_received_count += 1
             processed_device_ids.add(data_point.device_id)
-
         summary_message = f"Processed bulk telemetry for devices: {', '.join(list(processed_device_ids)) if processed_device_ids else 'None'}."
         print(f"PY_SERVER: Bulk upload finished. {summary_message} Received: {points_received_count}, Failed: {points_failed_count}")
         return iot_service_pb2.BulkUploadSummary(
@@ -168,12 +156,71 @@ class DeviceManagementServiceImpl(iot_service_pb2_grpc.DeviceManagementServiceSe
             message=summary_message
         )
 
+    def EstablishInteractiveSession(self, request_iterator, context):
+        client_peer = context.peer()
+        print(f"PY_SERVER: Interactive session established with client: {client_peer}")
+        initial_message = iot_service_pb2.ServerToDeviceMessage(
+            acknowledgement_message=f"Interactive session started with {client_peer}. Send your updates!"
+        )
+        yield initial_message
+        try:
+            for device_msg in request_iterator:
+                if not context.is_active():
+                    print(f"PY_SERVER: Client {client_peer} disconnected from interactive session.")
+                    break
+                print(f"PY_SERVER: Received from {client_peer} (Device ID: {device_msg.device_id}):")
+                response_to_client = iot_service_pb2.ServerToDeviceMessage()
+                send_response = False
+                if device_msg.HasField("live_telemetry"):
+                    telemetry = device_msg.live_telemetry
+                    print(f"  Live Telemetry - Sensor: {telemetry.sensor_id}, Value: {telemetry.value}")
+                    response_to_client.acknowledgement_message = f"Live telemetry for {telemetry.sensor_id} received."
+                    send_response = True
+                elif device_msg.HasField("status_update"):
+                    status = device_msg.status_update
+                    print(f"  Status Update: {status}")
+                    response_to_client.acknowledgement_message = f"Status '{status}' acknowledged."
+                    send_response = True
+                    if "CRITICAL" in status.upper():
+                        critical_command = iot_service_pb2.DeviceCommandRequest(
+                            device_id=device_msg.device_id,
+                            command_name="RUN_DIAGNOSTICS_URGENT",
+                            payload_json='{"level": "full"}'
+                        )
+                        response_to_client.command_request.CopyFrom(critical_command)
+                        send_response = True
+                elif device_msg.HasField("command_response_payload"):
+                    cmd_response = device_msg.command_response_payload
+                    print(f"  Command Response: {cmd_response}")
+                else:
+                    print("  Unknown message type received.")
+                    response_to_client.acknowledgement_message = "Unknown message type received by server."
+                    send_response = True
+                if send_response:
+                    yield response_to_client
+                if random.random() < 0.1:
+                    print(f"PY_SERVER: Proactively sending config check to {client_peer}")
+                    config_check_command = iot_service_pb2.DeviceCommandRequest(
+                        device_id=device_msg.device_id,
+                        command_name="REQUEST_CURRENT_CONFIG",
+                        payload_json='{}'
+                    )
+                    proactive_msg = iot_service_pb2.ServerToDeviceMessage()
+                    proactive_msg.command_request.CopyFrom(config_check_command)
+                    yield proactive_msg
+        except grpc.RpcError as e:
+            print(f"PY_SERVER: RPC error during interactive session with {client_peer}: {e}")
+        except Exception as e:
+            print(f"PY_SERVER: Unexpected error during interactive session with {client_peer}: {e}")
+            context.abort(grpc.StatusCode.INTERNAL, "Unexpected error during interactive session.")
+        finally:
+            print(f"PY_SERVER: Interactive session with {client_peer} concluded.")
+
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     iot_service_pb2_grpc.add_DeviceManagementServiceServicer_to_server(
         DeviceManagementServiceImpl(), server
     )
-
     try:
         with open(SERVER_PRIVATE_KEY_PATH, 'rb') as f:
             private_key = f.read()
@@ -183,11 +230,9 @@ def serve():
         print(f"Fatal Error: SSL certificate files not found. {e}")
         print(f"Ensure '{SERVER_PRIVATE_KEY_PATH}' and '{SERVER_CERTIFICATE_PATH}' are correctly copied into the container.")
         return
-
     server_credentials = grpc.ssl_server_credentials(
         ((private_key, certificate_chain),)
     )
-
     server.add_secure_port('[::]:50051', server_credentials)
     print("PY_SERVER: Python gRPC server started securely on port 50051...")
     server.start()
