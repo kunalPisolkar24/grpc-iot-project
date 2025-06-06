@@ -8,6 +8,7 @@ service DeviceManagementService {
     rpc SendCommandToDevice(DeviceCommandRequest) returns (CommandAcknowledgement);
     rpc SubscribeToDeviceTelemetry(TelemetrySubscriptionRequest) returns (stream TelemetryDataPoint);
     rpc UploadBulkTelemetry(stream TelemetryDataPoint) returns (BulkUploadSummary);
+    rpc EstablishInteractiveSession(stream DeviceToServerMessage) returns (stream ServerToDeviceMessage);
 }
 
 message DeviceRegistrationRequest {
@@ -58,4 +59,21 @@ message BulkUploadSummary {
     int32 points_received = 1;
     int32 points_failed = 2;
     string message = 3;
+}
+
+message DeviceToServerMessage {
+    string device_id = 1;
+    oneof event {
+        TelemetryDataPoint live_telemetry = 2;
+        string status_update = 3;
+        string command_response_payload = 4;
+    }
+}
+
+message ServerToDeviceMessage {
+    oneof action {
+        DeviceCommandRequest command_request = 1;
+        string config_update_json = 2;
+        string acknowledgement_message = 3;
+    }
 }
