@@ -10,6 +10,7 @@
     "dev:device": "ts-node src/device_simulator.ts",
     "dev:mgmt": "ts-node src/management_console.ts",
     "proto:gen": "grpc_tools_node_protoc --proto_path=./proto --plugin=protoc-gen-ts=./node_modules/grpc_tools_node_protoc_ts/bin/protoc-gen-ts --js_out=import_style=commonjs,binary:./src/proto_gen --grpc_out=grpc_js:./src/proto_gen --ts_out=service=grpc-js:./src/proto_gen iot_service.proto",
+    "proto:gen:local": "grpc_tools_node_protoc --proto_path=../proto --plugin=protoc-gen-ts=./node_modules/grpc_tools_node_protoc_ts/bin/protoc-gen-ts --js_out=import_style=commonjs,binary:./src/proto_gen --grpc_out=grpc_js:./src/proto_gen --ts_out=service=grpc-js:./src/proto_gen ../proto/iot_service.proto",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
