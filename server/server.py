@@ -1,8 +1,9 @@
 import grpc
 from concurrent import futures
 import time
-import iot_service_pb2 #type: ignore
-import iot_service_pb2_grpc #type: ignore
+import random
+import iot_service_pb2 # type: ignore
+import iot_service_pb2_grpc # type: ignore
 
 SERVER_CERTIFICATE_PATH = '/app/certs/server.crt'
 SERVER_PRIVATE_KEY_PATH = '/app/certs/server.key'
@@ -29,7 +30,8 @@ class DeviceManagementServiceImpl(iot_service_pb2_grpc.DeviceManagementServiceSe
         registered_devices[request.device_id] = {
             "type": request.device_type,
             "status": "ONLINE",
-            "registered_at": time.time()
+            "registered_at": time.time(),
+            "telemetry_subscribers": []
         }
         token = f"token_{request.device_id}_{int(time.time())}"
         message = f"Device {request.device_id} registered successfully with token {token}."
@@ -86,6 +88,60 @@ class DeviceManagementServiceImpl(iot_service_pb2_grpc.DeviceManagementServiceSe
             received=True,
             message=ack_message
         )
+
+    def SubscribeToDeviceTelemetry(self, request, context):
+        device_id = request.device_id
+        print(f"PY_SERVER: Client subscribed to telemetry for device: {device_id}")
+
+        if device_id not in registered_devices:
+            print(f"PY_SERVER: Device {device_id} not found for telemetry subscription.")
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details(f"Device {device_id} not found for telemetry.")
+            return iot_service_pb2.TelemetryDataPoint()
+
+        try:
+            for i in range(10):
+                if not context.is_active():
+                    print(f"PY_SERVER: Client for {device_id} telemetry disconnected.")
+                    break
+
+                temperature = 20 + random.uniform(-2, 2) + i * 0.5
+                humidity = 50 + random.uniform(-5, 5) - i * 0.3
+
+                temp_point = iot_service_pb2.TelemetryDataPoint(
+                    device_id=device_id,
+                    timestamp_ms=int(time.time() * 1000),
+                    sensor_id="temperature_sensor_01",
+                    value=round(temperature, 2),
+                    metadata={"unit": "celsius", "location": "server_room"}
+                )
+                print(f"PY_SERVER: Streaming temp: {temp_point.value} for {device_id}")
+                yield temp_point
+                time.sleep(0.5)
+
+                if not context.is_active():
+                    print(f"PY_SERVER: Client for {device_id} telemetry disconnected.")
+                    break
+
+                humidity_point = iot_service_pb2.TelemetryDataPoint(
+                    device_id=device_id,
+                    timestamp_ms=int(time.time() * 1000),
+                    sensor_id="humidity_sensor_01",
+                    value=round(humidity, 2),
+                    metadata={"unit": "%", "location": "server_room"}
+                )
+                print(f"PY_SERVER: Streaming humidity: {humidity_point.value} for {device_id}")
+                yield humidity_point
+                time.sleep(1.5)
+
+            print(f"PY_SERVER: Finished streaming telemetry for {device_id}")
+        except grpc.RpcError as e:
+            print(f"PY_SERVER: RPC error during telemetry streaming for {device_id}: {e}")
+        except Exception as e:
+            print(f"PY_SERVER: Unexpected error during telemetry streaming for {device_id}: {e}")
+            context.abort(grpc.StatusCode.INTERNAL, "Unexpected error during telemetry streaming.")
+        finally:
+            print(f"PY_SERVER: Telemetry stream for {device_id} concluded.")
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
