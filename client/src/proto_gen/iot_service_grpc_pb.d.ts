@@ -12,6 +12,7 @@ interface IDeviceManagementServiceService extends grpc.ServiceDefinition<grpc.Un
     getDeviceStatus: IDeviceManagementServiceService_IGetDeviceStatus;
     sendCommandToDevice: IDeviceManagementServiceService_ISendCommandToDevice;
     subscribeToDeviceTelemetry: IDeviceManagementServiceService_ISubscribeToDeviceTelemetry;
+    uploadBulkTelemetry: IDeviceManagementServiceService_IUploadBulkTelemetry;
 }
 
 interface IDeviceManagementServiceService_IRegisterDevice extends grpc.MethodDefinition<iot_service_pb.DeviceRegistrationRequest, iot_service_pb.DeviceRegistrationResponse> {
@@ -50,6 +51,15 @@ interface IDeviceManagementServiceService_ISubscribeToDeviceTelemetry extends gr
     responseSerialize: grpc.serialize<iot_service_pb.TelemetryDataPoint>;
     responseDeserialize: grpc.deserialize<iot_service_pb.TelemetryDataPoint>;
 }
+interface IDeviceManagementServiceService_IUploadBulkTelemetry extends grpc.MethodDefinition<iot_service_pb.TelemetryDataPoint, iot_service_pb.BulkUploadSummary> {
+    path: "/iotdevice.DeviceManagementService/UploadBulkTelemetry";
+    requestStream: true;
+    responseStream: false;
+    requestSerialize: grpc.serialize<iot_service_pb.TelemetryDataPoint>;
+    requestDeserialize: grpc.deserialize<iot_service_pb.TelemetryDataPoint>;
+    responseSerialize: grpc.serialize<iot_service_pb.BulkUploadSummary>;
+    responseDeserialize: grpc.deserialize<iot_service_pb.BulkUploadSummary>;
+}
 
 export const DeviceManagementServiceService: IDeviceManagementServiceService;
 
@@ -58,6 +68,7 @@ export interface IDeviceManagementServiceServer {
     getDeviceStatus: grpc.handleUnaryCall<iot_service_pb.DeviceStatusRequest, iot_service_pb.DeviceStatusResponse>;
     sendCommandToDevice: grpc.handleUnaryCall<iot_service_pb.DeviceCommandRequest, iot_service_pb.CommandAcknowledgement>;
     subscribeToDeviceTelemetry: grpc.handleServerStreamingCall<iot_service_pb.TelemetrySubscriptionRequest, iot_service_pb.TelemetryDataPoint>;
+    uploadBulkTelemetry: grpc.handleClientStreamingCall<iot_service_pb.TelemetryDataPoint, iot_service_pb.BulkUploadSummary>;
 }
 
 export interface IDeviceManagementServiceClient {
@@ -72,6 +83,10 @@ export interface IDeviceManagementServiceClient {
     sendCommandToDevice(request: iot_service_pb.DeviceCommandRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.CommandAcknowledgement) => void): grpc.ClientUnaryCall;
     subscribeToDeviceTelemetry(request: iot_service_pb.TelemetrySubscriptionRequest, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<iot_service_pb.TelemetryDataPoint>;
     subscribeToDeviceTelemetry(request: iot_service_pb.TelemetrySubscriptionRequest, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<iot_service_pb.TelemetryDataPoint>;
+    uploadBulkTelemetry(callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
+    uploadBulkTelemetry(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
+    uploadBulkTelemetry(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
+    uploadBulkTelemetry(metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
 }
 
 export class DeviceManagementServiceClient extends grpc.Client implements IDeviceManagementServiceClient {
@@ -87,4 +102,8 @@ export class DeviceManagementServiceClient extends grpc.Client implements IDevic
     public sendCommandToDevice(request: iot_service_pb.DeviceCommandRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.CommandAcknowledgement) => void): grpc.ClientUnaryCall;
     public subscribeToDeviceTelemetry(request: iot_service_pb.TelemetrySubscriptionRequest, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<iot_service_pb.TelemetryDataPoint>;
     public subscribeToDeviceTelemetry(request: iot_service_pb.TelemetrySubscriptionRequest, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<iot_service_pb.TelemetryDataPoint>;
+    public uploadBulkTelemetry(callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
+    public uploadBulkTelemetry(metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
+    public uploadBulkTelemetry(options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
+    public uploadBulkTelemetry(metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: iot_service_pb.BulkUploadSummary) => void): grpc.ClientWritableStream<iot_service_pb.TelemetryDataPoint>;
 }

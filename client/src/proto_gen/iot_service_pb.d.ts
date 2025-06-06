@@ -203,3 +203,29 @@ export namespace TelemetryDataPoint {
         metadataMap: Array<[string, string]>,
     }
 }
+
+export class BulkUploadSummary extends jspb.Message { 
+    getPointsReceived(): number;
+    setPointsReceived(value: number): BulkUploadSummary;
+    getPointsFailed(): number;
+    setPointsFailed(value: number): BulkUploadSummary;
+    getMessage(): string;
+    setMessage(value: string): BulkUploadSummary;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): BulkUploadSummary.AsObject;
+    static toObject(includeInstance: boolean, msg: BulkUploadSummary): BulkUploadSummary.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: BulkUploadSummary, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): BulkUploadSummary;
+    static deserializeBinaryFromReader(message: BulkUploadSummary, reader: jspb.BinaryReader): BulkUploadSummary;
+}
+
+export namespace BulkUploadSummary {
+    export type AsObject = {
+        pointsReceived: number,
+        pointsFailed: number,
+        message: string,
+    }
+}

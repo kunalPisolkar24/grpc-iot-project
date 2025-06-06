@@ -4,6 +4,17 @@
 var grpc = require('@grpc/grpc-js');
 var iot_service_pb = require('./iot_service_pb.js');
 
+function serialize_iotdevice_BulkUploadSummary(arg) {
+  if (!(arg instanceof iot_service_pb.BulkUploadSummary)) {
+    throw new Error('Expected argument of type iotdevice.BulkUploadSummary');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_iotdevice_BulkUploadSummary(buffer_arg) {
+  return iot_service_pb.BulkUploadSummary.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_iotdevice_CommandAcknowledgement(arg) {
   if (!(arg instanceof iot_service_pb.CommandAcknowledgement)) {
     throw new Error('Expected argument of type iotdevice.CommandAcknowledgement');
@@ -137,6 +148,17 @@ var DeviceManagementServiceService = exports.DeviceManagementServiceService = {
     requestDeserialize: deserialize_iotdevice_TelemetrySubscriptionRequest,
     responseSerialize: serialize_iotdevice_TelemetryDataPoint,
     responseDeserialize: deserialize_iotdevice_TelemetryDataPoint,
+  },
+  uploadBulkTelemetry: {
+    path: '/iotdevice.DeviceManagementService/UploadBulkTelemetry',
+    requestStream: true,
+    responseStream: false,
+    requestType: iot_service_pb.TelemetryDataPoint,
+    responseType: iot_service_pb.BulkUploadSummary,
+    requestSerialize: serialize_iotdevice_TelemetryDataPoint,
+    requestDeserialize: deserialize_iotdevice_TelemetryDataPoint,
+    responseSerialize: serialize_iotdevice_BulkUploadSummary,
+    responseDeserialize: deserialize_iotdevice_BulkUploadSummary,
   },
 };
 
