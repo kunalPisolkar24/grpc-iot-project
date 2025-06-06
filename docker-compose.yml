@@ -41,7 +41,7 @@ services:
       - TARGET_DEVICE_ID=fixed-ts-device-001
       - NODE_ENV=development
     # command: ["node", "dist/management_console.js", "fixed-ts-device-001", "status"] # Unary RPC
-    command: ["node", "dist/management_console.js", "fixed-ts-device-001"] # Server Streaming
+    command: ["node", "dist/management_console.js", "fixed-ts-device-001"] # Server, Client, Bi-directional Streaming
     depends_on:
       - py-server
       - node-device-simulator-ts
