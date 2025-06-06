@@ -70,6 +70,28 @@ function deserialize_iotdevice_DeviceStatusResponse(buffer_arg) {
   return iot_service_pb.DeviceStatusResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_iotdevice_TelemetryDataPoint(arg) {
+  if (!(arg instanceof iot_service_pb.TelemetryDataPoint)) {
+    throw new Error('Expected argument of type iotdevice.TelemetryDataPoint');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_iotdevice_TelemetryDataPoint(buffer_arg) {
+  return iot_service_pb.TelemetryDataPoint.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_iotdevice_TelemetrySubscriptionRequest(arg) {
+  if (!(arg instanceof iot_service_pb.TelemetrySubscriptionRequest)) {
+    throw new Error('Expected argument of type iotdevice.TelemetrySubscriptionRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_iotdevice_TelemetrySubscriptionRequest(buffer_arg) {
+  return iot_service_pb.TelemetrySubscriptionRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 
 var DeviceManagementServiceService = exports.DeviceManagementServiceService = {
   registerDevice: {
@@ -104,6 +126,17 @@ var DeviceManagementServiceService = exports.DeviceManagementServiceService = {
     requestDeserialize: deserialize_iotdevice_DeviceCommandRequest,
     responseSerialize: serialize_iotdevice_CommandAcknowledgement,
     responseDeserialize: deserialize_iotdevice_CommandAcknowledgement,
+  },
+  subscribeToDeviceTelemetry: {
+    path: '/iotdevice.DeviceManagementService/SubscribeToDeviceTelemetry',
+    requestStream: false,
+    responseStream: true,
+    requestType: iot_service_pb.TelemetrySubscriptionRequest,
+    responseType: iot_service_pb.TelemetryDataPoint,
+    requestSerialize: serialize_iotdevice_TelemetrySubscriptionRequest,
+    requestDeserialize: deserialize_iotdevice_TelemetrySubscriptionRequest,
+    responseSerialize: serialize_iotdevice_TelemetryDataPoint,
+    responseDeserialize: deserialize_iotdevice_TelemetryDataPoint,
   },
 };
 

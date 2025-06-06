@@ -149,3 +149,57 @@ export namespace CommandAcknowledgement {
         message: string,
     }
 }
+
+export class TelemetrySubscriptionRequest extends jspb.Message { 
+    getDeviceId(): string;
+    setDeviceId(value: string): TelemetrySubscriptionRequest;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): TelemetrySubscriptionRequest.AsObject;
+    static toObject(includeInstance: boolean, msg: TelemetrySubscriptionRequest): TelemetrySubscriptionRequest.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: TelemetrySubscriptionRequest, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): TelemetrySubscriptionRequest;
+    static deserializeBinaryFromReader(message: TelemetrySubscriptionRequest, reader: jspb.BinaryReader): TelemetrySubscriptionRequest;
+}
+
+export namespace TelemetrySubscriptionRequest {
+    export type AsObject = {
+        deviceId: string,
+    }
+}
+
+export class TelemetryDataPoint extends jspb.Message { 
+    getDeviceId(): string;
+    setDeviceId(value: string): TelemetryDataPoint;
+    getTimestampMs(): number;
+    setTimestampMs(value: number): TelemetryDataPoint;
+    getSensorId(): string;
+    setSensorId(value: string): TelemetryDataPoint;
+    getValue(): number;
+    setValue(value: number): TelemetryDataPoint;
+
+    getMetadataMap(): jspb.Map<string, string>;
+    clearMetadataMap(): void;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): TelemetryDataPoint.AsObject;
+    static toObject(includeInstance: boolean, msg: TelemetryDataPoint): TelemetryDataPoint.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: TelemetryDataPoint, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): TelemetryDataPoint;
+    static deserializeBinaryFromReader(message: TelemetryDataPoint, reader: jspb.BinaryReader): TelemetryDataPoint;
+}
+
+export namespace TelemetryDataPoint {
+    export type AsObject = {
+        deviceId: string,
+        timestampMs: number,
+        sensorId: string,
+        value: number,
+
+        metadataMap: Array<[string, string]>,
+    }
+}
