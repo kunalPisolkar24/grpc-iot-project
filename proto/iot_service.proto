@@ -6,6 +6,7 @@ service DeviceManagementService {
     rpc RegisterDevice(DeviceRegistrationRequest) returns (DeviceRegistrationResponse);
     rpc GetDeviceStatus(DeviceStatusRequest) returns (DeviceStatusResponse);
     rpc SendCommandToDevice(DeviceCommandRequest) returns (CommandAcknowledgement);
+    rpc SubscribeToDeviceTelemetry(TelemetrySubscriptionRequest) returns (stream TelemetryDataPoint);
 }
 
 message DeviceRegistrationRequest {
@@ -38,4 +39,16 @@ message DeviceCommandRequest {
 message CommandAcknowledgement {
     bool received = 1;
     string message = 2;
+}
+
+message TelemetrySubscriptionRequest {
+    string device_id = 1;
+}
+
+message TelemetryDataPoint {
+    string device_id = 1;
+    int64 timestamp_ms = 2;
+    string sensor_id = 3;
+    double value = 4;
+    map<string, string> metadata = 5;
 }
